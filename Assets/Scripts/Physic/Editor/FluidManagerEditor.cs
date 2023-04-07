@@ -6,19 +6,21 @@ public class FluidManagerEditor : Editor
 {
     private static Vector3 pointSnap = Vector3.one * 0.1f;
 
-    private SerializedObject target;
-    private SerializedProperty pos, radius;
+    private SerializedObject fmTarget;
+    private SerializedProperty pos, radius, particles;
 
     void OnEnable()
     {
-        target = new SerializedObject(targets);
-        pos = target.FindProperty("m_spawnPosition");
-        radius = target.FindProperty("m_spawnRadius");
-    }
-
+        fmTarget = new SerializedObject(targets);
+        pos = fmTarget.FindProperty("m_spawnPosition");
+        radius = fmTarget.FindProperty("m_spawnRadius");
+        particles = fmTarget.FindProperty("m_particle");
     void OnSceneGUI()
     {
-        //Transform transform = ((FluidManager)target).transform;
+
+
+        Transform transform = (target as FluidManager).transform;
+        //Handles.CircleHandleCap((Vector3)pos, Quaternion.identity, radius, );
         //Handles.color = Handles.xAxisColor;
         //Handles.CircleHandleCap(
         //    0,
@@ -28,4 +30,10 @@ public class FluidManagerEditor : Editor
         //    EventType.Repaint
         //);
     }
+
+    private void PrintParticle()
+    {
+        
+    }
+    
 }
