@@ -1,4 +1,6 @@
+using System.Numerics;
 using UnityEngine;
+using Vector2 = UnityEngine.Vector2;
 
 public class SmoothedParticleHydrodynamics
 {
@@ -105,5 +107,16 @@ public class SmoothedParticleHydrodynamics
     Vector2 ProcessVelocity(Particle particle)
     {
        return particle.velocity + (Physics2D.gravity + (particle.pressionForce + particle.viscosityForce) / particle.density) * Time.deltaTime;
+    }
+
+    static void  CheckCollider(Vector2 prevPos, ref Vector2 nextPos)
+    {
+        float magnitude = (nextPos - prevPos).magnitude;
+        RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos)/magnitude, magnitude );
+        if (!hit) 
+            return;
+        
+        float dist = (nextPos - hit.point).magnitude;
+        nextPos =  hit.point * hit.normal* dist;
     }
 }
