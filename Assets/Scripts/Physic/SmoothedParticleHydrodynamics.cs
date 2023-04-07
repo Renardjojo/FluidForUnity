@@ -1,4 +1,3 @@
-using System.Numerics;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
@@ -6,26 +5,26 @@ public class SmoothedParticleHydrodynamics
 {
     static float waterVolumicMass = 997f;
 
-
-    [SerializeField] float radius;
-
-    Particle m_baseParticle;
-    Particle[] m_neighbourParticles;
-
-    void UpdateParticles()
+    public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
-        m_baseParticle.density = ProcessDensity(m_baseParticle);
-        m_baseParticle.pression = ProcessPression(m_baseParticle);
-
-        m_baseParticle.pressionForce = ProcessPressionForce(m_baseParticle);
-        m_baseParticle.viscosityForce = ProcessViscosityForce(m_baseParticle);
-        
-        m_baseParticle.velocity = ProcessVelocity(m_baseParticle);
+        baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius);
+        baseParticle.pression = ProcessPression(baseParticle);
+    }
+    
+    public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
+    {
+        baseParticle.pressionForce = ProcessPressionForce(baseParticle, neighbourParticles, radius);
+        baseParticle.viscosityForce = ProcessViscosityForce(baseParticle, neighbourParticles, radius);
+    }
+    
+    public static void UpdateParticleVelocity(ref Particle baseParticle, float detlaTime)
+    {
+        baseParticle.velocity = ProcessVelocity(baseParticle, detlaTime);
     }
 
     // r = distance, h = radius
     // Usefull for density
-    float GetWeightPoly6(float dist)
+    static float GetWeightPoly6(float dist, float radius)
     {
         if (dist > radius)
             return 0;
@@ -35,7 +34,7 @@ public class SmoothedParticleHydrodynamics
 
     // r = distance, h = radius
     // Usefull for pression
-    float GetWeightSpiky(float dist)
+    static float GetWeightSpiky(float dist, float radius)
     {
         if (dist > radius)
             return 0f;
@@ -45,77 +44,64 @@ public class SmoothedParticleHydrodynamics
 
     // r = distance, h = radius
     // Usefull for viscosity
-    Vector2 GetDirLaplacien(Vector2 offset)
+    static Vector2 GetDirLaplacien(Vector2 offset, float radius)
     {
         return -45f * offset.normalized * (radius - offset.magnitude) / (Mathf.PI * Mathf.Pow(radius, 6));
     }
 
     // r = distance, h = radius
     // Usefull for viscosity
-    float GetWeightLaplacien(float dist)
+    static float GetWeightLaplacien(float dist, float radius)
     {
         return 45f / (Mathf.PI * Mathf.Pow(radius, 6)) * (radius - dist);
     }
 
-    float ProcessDensity(Particle particle)
+    static float ProcessDensity(Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
         float sum = 0f;
-        for (int i = 0; i < m_neighbourParticles.Length; i++)
+        for (int i = 0; i < neighbourParticles.Length; i++)
         {
-            sum += GetWeightPoly6((m_neighbourParticles[i].pos - particle.pos).magnitude);
+            sum += GetWeightPoly6((neighbourParticles[i].pos - baseParticle.pos).magnitude, radius);
         }
 
-        return particle.mass * sum;
+        return baseParticle.mass * sum;
     }
 
-    Vector2 ProcessPression(Particle particle)
+    static float ProcessPression(Particle baseParticle)
     {
-        //TODO: Vector2 k = (particle.density - m_pos).normalized;
-        Vector2 k = Vector2.one;
-        
+        float k = baseParticle.density - waterVolumicMass;
+
         //p0 = waterVolumicMass ? maybe 
-        return k * (particle.density - waterVolumicMass);
+        return k * (baseParticle.density - waterVolumicMass);
     }
 
-    Vector2 ProcessPressionForce(Particle particle)
+    static Vector2 ProcessPressionForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
         Vector2 sum = Vector2.zero;
-        for (int i = 0; i < m_neighbourParticles.Length; i++)
+        for (int i = 0; i < neighbourParticles.Length; i++)
         {
-            sum += (particle.pression + m_neighbourParticles[i].pression) / (2f * m_neighbourParticles[i].density) *
-                   GetDirLaplacien(m_neighbourParticles[i].pos - particle.pos);
+            sum += (baseParticle.pression + neighbourParticles[i].pression) / (2f * neighbourParticles[i].density) *
+                   GetDirLaplacien(neighbourParticles[i].pos - baseParticle.pos, radius);
         }
 
-        return -particle.mass * sum;
+        return -baseParticle.mass * sum;
     }
 
-    Vector2 ProcessViscosityForce(Particle particle)
+    static Vector2 ProcessViscosityForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
         Vector2 sum = Vector2.zero;
-        for (int i = 0; i < m_neighbourParticles.Length; i++)
+        for (int i = 0; i < neighbourParticles.Length; i++)
         {
-            sum += (m_neighbourParticles[i].velocity - particle.velocity) / m_neighbourParticles[i].density *
-                   GetWeightLaplacien((m_neighbourParticles[i].pos - particle.pos).magnitude);
+            sum += (neighbourParticles[i].velocity - baseParticle.velocity) / neighbourParticles[i].density *
+                   GetWeightLaplacien((neighbourParticles[i].pos - baseParticle.pos).magnitude, radius);
         }
 
-        return particle.viscosityCoef * particle.mass * sum;
+        return baseParticle.viscosityCoef * baseParticle.mass * sum;
     }
 
-    Vector2 ProcessVelocity(Particle particle)
+    static Vector2 ProcessVelocity(Particle baseParticle, float detlaTime)
     {
-        return particle.velocity +
-               (Physics2D.gravity + (particle.pressionForce + particle.viscosityForce) / particle.density) *
-               Time.deltaTime;
-    }
-
-    static void  CheckCollider(Vector2 prevPos, ref Vector2 nextPos)
-    {
-        float magnitude = (nextPos - prevPos).magnitude;
-        RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos)/magnitude, magnitude );
-        if (!hit) 
-            return;
-        
-        float dist = (nextPos - hit.point).magnitude;
-        nextPos =  hit.point * hit.normal* dist;
+        return baseParticle.velocity +
+               (Physics2D.gravity + (baseParticle.pressionForce + baseParticle.viscosityForce) / baseParticle.density) * detlaTime;
     }
 }
