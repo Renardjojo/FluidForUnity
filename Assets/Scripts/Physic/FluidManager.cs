@@ -4,12 +4,13 @@ using Random = UnityEngine.Random;
 
 public class FluidManager : MonoBehaviour
 {
-    SmoothedParticleHydrodynamics[] particleGroups;
+    SmoothedParticleHydrodynamics m_particleGroups;
 
     [SerializeField, Min(0)]
     int m_particlesCounts;
 
-    private Particle[] m_particle;
+    private Particle[] m_prevParticle;
+    private Particle[] m_currentParticle;
 
     [SerializeField]
     private Vector2 m_spawnPosition;
@@ -29,13 +30,14 @@ public class FluidManager : MonoBehaviour
 
     void GenerateParticles()
     {
-        m_particle = new Particle[m_particlesCounts];
-
+        m_prevParticle = new Particle[m_particlesCounts];
+        m_currentParticle = new Particle[m_particlesCounts];
+        
         for (int i = 0; i < m_particlesCounts; i++)
         {
             Particle newParticle = new Particle();
             newParticle.pos = GetRandomPointInCircleUniform(); 
-            m_particle[i] = newParticle;
+            m_prevParticle[i] = newParticle;
         }
     }
     
