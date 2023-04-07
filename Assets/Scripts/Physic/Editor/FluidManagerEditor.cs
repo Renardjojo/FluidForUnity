@@ -15,6 +15,8 @@ public class FluidManagerEditor : Editor
         pos = fmTarget.FindProperty("m_spawnPosition");
         radius = fmTarget.FindProperty("m_spawnRadius");
         particles = fmTarget.FindProperty("m_particle");
+    }
+
     void OnSceneGUI()
     {
 
