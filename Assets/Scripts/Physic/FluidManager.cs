@@ -1,29 +1,50 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
-
-// TODO:
-// SmoothedParticleHydrodynamics ok mais grosse intérrogation sur p0 
-// Faire le fluid manager mais questionnement sur la gestion des SmoothedParticleHydrodynamics.
-// Comment les particules se déplace ?
-// Toujours dans le même groupe ou peuvent changer de groupe ?
+using Random = UnityEngine.Random;
 
 public class FluidManager : MonoBehaviour
 {
     SmoothedParticleHydrodynamics[] particleGroups;
 
-    [SerializeField]
-    int particlesCounts;
+    [SerializeField, Min(0)]
+    int m_particlesCounts;
 
-    // Start is called before the first frame update
+    private Particle[] m_particle;
+
+    [SerializeField]
+    private Vector2 m_spawnPosition;
+    
+    [SerializeField]
+    private float m_spawnRadius;
+    
     void Start()
+    {
+        GenerateParticles();
+    }
+
+    void Update()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    void GenerateParticles()
     {
-        
+        m_particle = new Particle[m_particlesCounts];
+
+        for (int i = 0; i < m_particlesCounts; i++)
+        {
+            Particle newParticle = new Particle();
+            newParticle.pos = GetRandomPointInCircleUniform(); 
+            m_particle[i] = newParticle;
+        }
+    }
+    
+    public Vector2 GetRandomPointInCircleUniform()
+    {
+        float t = 2 * Mathf.PI * Random.value;
+        float r = Mathf.Sqrt(Random.value);
+        float x = r * Mathf.Cos(t);
+        float y = r * Mathf.Sin(t);
+        return new Vector2(x, y);
     }
 }
