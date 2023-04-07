@@ -444,8 +444,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_particlesCounts: 50
+  m_groupRadius: 0.5
   m_spawnPosition: {x: 3.0193806, y: 5.7712007}
-  m_spawnRadius: 1.99
+  m_spawnRadius: 2
 --- !u!4 &1090033834
 Transform:
   m_ObjectHideFlags: 0
