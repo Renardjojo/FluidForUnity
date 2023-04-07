@@ -14,7 +14,6 @@ public class FluidManager : MonoBehaviour
 
     [SerializeField]
     internal Vector2 m_spawnPosition;
-    
     [SerializeField]
     internal float m_spawnRadius;
     
