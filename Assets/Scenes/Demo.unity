@@ -443,9 +443,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 0
-  m_spawnPosition: {x: -0.026249409, y: -0.16274047}
-  m_spawnRadius: 3.356892
+  m_particlesCounts: 50
+  m_spawnPosition: {x: 3.0193806, y: 5.7712007}
+  m_spawnRadius: 1.99
 --- !u!4 &1090033834
 Transform:
   m_ObjectHideFlags: 0

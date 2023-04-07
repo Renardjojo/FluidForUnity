@@ -9,7 +9,7 @@ public struct Particle
     // Current state
     public Vector2 velocity; //u
     public float density; //𝜌
-    public float pression; //P 
+    public Vector2 pression; //P 
     public Vector2 pressionForce; //Fp
     public Vector2 viscosityForce; //Fv
 }

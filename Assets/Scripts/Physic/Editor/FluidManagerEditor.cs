@@ -5,8 +5,8 @@ using UnityEngine;
 [CanEditMultipleObjects, CustomEditor(typeof(FluidManager))]
 public class FluidManagerEditor : Editor
 {
-    private static float handleSize = 0.2f;
-    private static float ParticuleSize = 0.02f;
+    private static float s_handleSize = 0.2f;
+    private static float s_particuleSize = 0.05f;
 
     private FluidManager m_self;
 
@@ -29,7 +29,7 @@ public class FluidManagerEditor : Editor
         Handles.color = Color.green;
         EditorGUI.BeginChangeCheck();
         Vector3 newPos = Handles.FreeMoveHandle(m_self.transform.position + m_self.m_spawnPosition.ToVector3(), Quaternion.identity,
-            HandleUtility.GetHandleSize(m_self.m_spawnPosition.ToVector3()) * handleSize, Vector3.one, Handles.SphereHandleCap);
+            HandleUtility.GetHandleSize(m_self.m_spawnPosition.ToVector3()) * s_handleSize, Vector3.one, Handles.SphereHandleCap);
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(m_self, "Change spawn position of fluid manager");
@@ -39,7 +39,7 @@ public class FluidManagerEditor : Editor
         Handles.color = Color.blue;
         EditorGUI.BeginChangeCheck();
         Vector3 newRadiusPos = Handles.FreeMoveHandle(m_self.transform.position + m_self.m_spawnPosition.ToVector3() + m_self.m_spawnRadius * Vector3.left, Quaternion.identity,
-            HandleUtility.GetHandleSize(m_self.m_spawnPosition.ToVector3()) * handleSize, Vector3.one, Handles.SphereHandleCap);
+            HandleUtility.GetHandleSize(m_self.m_spawnPosition.ToVector3()) * s_handleSize, Vector3.one, Handles.SphereHandleCap);
         
         if (EditorGUI.EndChangeCheck())
         {
@@ -56,13 +56,13 @@ public class FluidManagerEditor : Editor
 
     private void PrintParticle()
     {
-        if (m_self.m_currentParticle == null)
+        if (m_self.m_prevParticle == null)
             return;
         
-        Particle[] particles = m_self.m_currentParticle;
+        Particle[] particles = m_self.m_prevParticle;
         foreach (var particle in particles)
         {
-            Handles.DrawSolidDisc(particle.pos, Vector3.forward, HandleUtility.GetHandleSize(particle.pos) * ParticuleSize);
+            Handles.DrawSolidDisc(particle.pos, Vector3.forward, HandleUtility.GetHandleSize(particle.pos) * s_particuleSize);
         }
     }
     

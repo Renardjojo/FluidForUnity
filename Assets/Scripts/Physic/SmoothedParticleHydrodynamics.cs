@@ -8,7 +8,7 @@ public class SmoothedParticleHydrodynamics
     public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
         baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius);
-        baseParticle.pression = ProcessPression(baseParticle);
+        baseParticle.pression = ProcessPression(baseParticle, neighbourParticles);
     }
     
     public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
@@ -20,6 +20,7 @@ public class SmoothedParticleHydrodynamics
     public static void UpdateParticleVelocity(ref Particle baseParticle, float detlaTime)
     {
         baseParticle.velocity = ProcessVelocity(baseParticle, detlaTime);
+        baseParticle.pos += baseParticle.velocity * detlaTime;
     }
 
     // r = distance, h = radius
@@ -67,12 +68,16 @@ public class SmoothedParticleHydrodynamics
         return baseParticle.mass * sum;
     }
 
-    static float ProcessPression(Particle baseParticle)
+    static Vector2 ProcessPression(Particle baseParticle, Particle[] neighbourParticles)
     {
-        float k = baseParticle.density - waterVolumicMass;
+        Vector2 k = Vector2.zero;
+        for (int i = 0; i < neighbourParticles.Length; i++)
+        {
+            k += baseParticle.pos - neighbourParticles[i].pos;
+        }
 
         //p0 = waterVolumicMass ? maybe 
-        return k * (baseParticle.density - waterVolumicMass);
+        return k.normalized * (baseParticle.density - waterVolumicMass);
     }
 
     static Vector2 ProcessPressionForce(Particle baseParticle, Particle[] neighbourParticles, float radius)

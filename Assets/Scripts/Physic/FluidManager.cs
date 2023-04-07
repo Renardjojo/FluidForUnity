@@ -1,13 +1,16 @@
 
+using System.Collections.Generic;
+using Physic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class FluidManager : MonoBehaviour
 {
-    SmoothedParticleHydrodynamics m_particleGroups;
-
-    [SerializeField, Min(0)]
+    [SerializeField, Min(1)]
     internal int m_particlesCounts;
+    
+    [SerializeField, Min(0.1f)]
+    internal float m_groupRadius = 3f;
 
     internal Particle[] m_prevParticle;
     internal Particle[] m_currentParticle;
@@ -24,19 +27,49 @@ public class FluidManager : MonoBehaviour
 
     void FixedUpdate()
     {
+        List<Particle>[] neighbours = ProcessNeighbour();
+        
         for (int i = 0; i < m_particlesCounts; i++)
         {
-            SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], m_prevParticle, 3f);
+            SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], neighbours[i].ToArray(), m_groupRadius);
         }
         
         for (int i = 0; i < m_particlesCounts; i++)
         {
-            SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], m_prevParticle, 3f);
+            SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], neighbours[i].ToArray(), m_groupRadius);
             
             Vector2 prevPos = m_currentParticle[i].pos;
             SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i], Time.fixedDeltaTime);
             CheckCollider(prevPos, ref m_currentParticle[i].pos);
         }
+
+        m_currentParticle = m_prevParticle;
+    }
+
+    List<Particle>[] ProcessNeighbour()
+    {
+        List<Particle>[] particleNeighbour = new List<Particle>[m_particlesCounts];
+        float sqGroupRadius = m_groupRadius * m_groupRadius;
+        
+        for (int i = 0; i < m_particlesCounts; i++)
+        {
+            particleNeighbour[i] = new List<Particle>();
+            Vector2 currentParticlePos = m_prevParticle[i].pos;
+
+            for (int j = 0; j < m_particlesCounts; j++)
+            {
+                // Don't include self
+                if (i == j)
+                    continue;
+
+                if ((currentParticlePos - m_prevParticle[j].pos).sqrMagnitude < sqGroupRadius)
+                {
+                    particleNeighbour[i].Add(m_prevParticle[j]);
+                }
+            }
+        }
+
+        return particleNeighbour;
     }
 
     void GenerateParticles()
@@ -47,9 +80,12 @@ public class FluidManager : MonoBehaviour
         for (int i = 0; i < m_particlesCounts; i++)
         {
             Particle newParticle = new Particle();
-            newParticle.pos = GetRandomPointInCircleUniform(m_spawnPosition, m_spawnRadius); 
+            newParticle.pos = GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius); 
+            newParticle.mass = 1f; 
+            newParticle.viscosityCoef = 0.1f;
             m_prevParticle[i] = newParticle;
         }
+        m_currentParticle = m_prevParticle;
     }
     
     static Vector2 GetRandomPointInCircleUniform(Vector2 center, float radius)
