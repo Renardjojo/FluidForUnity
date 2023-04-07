@@ -6,6 +6,8 @@ using UnityEngine;
 public class FluidManagerEditor : Editor
 {
     private static float handleSize = 0.2f;
+    private static float ParticuleSize = 0.02f;
+
     private FluidManager m_self;
 
     void OnEnable()
@@ -30,7 +32,7 @@ public class FluidManagerEditor : Editor
             HandleUtility.GetHandleSize(m_self.m_spawnPosition.ToVector3()) * handleSize, Vector3.one, Handles.SphereHandleCap);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(m_self.transform, "Change spawn position of fluid manager");
+            Undo.RecordObject(m_self, "Change spawn position of fluid manager");
             m_self.m_spawnPosition = newPos.ToVector2();
         }
         
@@ -41,7 +43,7 @@ public class FluidManagerEditor : Editor
         
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(m_self.transform, "Change spawn radius of fluid manager");
+            Undo.RecordObject(m_self, "Change spawn radius of fluid manager");
             m_self.m_spawnRadius = (newRadiusPos.ToVector2() - m_self.m_spawnPosition).magnitude;
         }
     }
@@ -49,11 +51,19 @@ public class FluidManagerEditor : Editor
     void OnSceneGUI()
     {
         DrawAndControlSpawnZone();
+        PrintParticle();
     }
 
     private void PrintParticle()
     {
+        if (m_self.m_currentParticle == null)
+            return;
         
+        Particle[] particles = m_self.m_currentParticle;
+        foreach (var particle in particles)
+        {
+            Handles.DrawSolidDisc(particle.pos, Vector3.forward, HandleUtility.GetHandleSize(particle.pos) * ParticuleSize);
+        }
     }
     
 }
