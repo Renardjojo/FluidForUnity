@@ -7,16 +7,16 @@ public class FluidManager : MonoBehaviour
     SmoothedParticleHydrodynamics m_particleGroups;
 
     [SerializeField, Min(0)]
-    int m_particlesCounts;
+    internal int m_particlesCounts;
 
-    private Particle[] m_prevParticle;
-    private Particle[] m_currentParticle;
+    internal Particle[] m_prevParticle;
+    internal Particle[] m_currentParticle;
 
     [SerializeField]
-    private Vector2 m_spawnPosition;
+    internal Vector2 m_spawnPosition;
     
     [SerializeField]
-    private float m_spawnRadius;
+    internal float m_spawnRadius;
     
     void Start()
     {
