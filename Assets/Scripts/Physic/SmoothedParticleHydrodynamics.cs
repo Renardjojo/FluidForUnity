@@ -1,4 +1,3 @@
-using System.Numerics;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
@@ -6,15 +5,21 @@ public class SmoothedParticleHydrodynamics
 {
     static float waterVolumicMass = 997f;
 
-    static void UpdateParticle(Particle baseParticle, Particle[] neighbourParticles, float radius)
+    public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
         baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius);
-        baseParticle.pression = ProcessPression(baseParticle, neighbourParticles);
-
+        baseParticle.pression = ProcessPression(baseParticle);
+    }
+    
+    public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
+    {
         baseParticle.pressionForce = ProcessPressionForce(baseParticle, neighbourParticles, radius);
         baseParticle.viscosityForce = ProcessViscosityForce(baseParticle, neighbourParticles, radius);
-        
-        baseParticle.velocity = ProcessVelocity(baseParticle, neighbourParticles);
+    }
+    
+    public static void UpdateParticleVelocity(ref Particle baseParticle, float detlaTime)
+    {
+        baseParticle.velocity = ProcessVelocity(baseParticle, detlaTime);
     }
 
     // r = distance, h = radius
@@ -62,11 +67,10 @@ public class SmoothedParticleHydrodynamics
         return baseParticle.mass * sum;
     }
 
-    static Vector2 ProcessPression(Particle baseParticle, Particle[] neighbourParticles)
+    static float ProcessPression(Particle baseParticle)
     {
-        //TODO: Vector2 k = (baseParticle.density - m_pos).normalized;
-        Vector2 k = Vector2.one;
-        
+        float k = baseParticle.density - waterVolumicMass;
+
         //p0 = waterVolumicMass ? maybe 
         return k * (baseParticle.density - waterVolumicMass);
     }
@@ -95,21 +99,9 @@ public class SmoothedParticleHydrodynamics
         return baseParticle.viscosityCoef * baseParticle.mass * sum;
     }
 
-    static Vector2 ProcessVelocity(Particle baseParticle, Particle[] neighbourParticles)
+    static Vector2 ProcessVelocity(Particle baseParticle, float detlaTime)
     {
         return baseParticle.velocity +
-               (Physics2D.gravity + (baseParticle.pressionForce + baseParticle.viscosityForce) / baseParticle.density) *
-               Time.deltaTime;
-    }
-
-    static void CheckCollider(Vector2 prevPos, ref Vector2 nextPos)
-    {
-        float magnitude = (nextPos - prevPos).magnitude;
-        RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos)/magnitude, magnitude );
-        if (!hit) 
-            return;
-        
-        float dist = (nextPos - hit.point).magnitude;
-        nextPos =  hit.point * hit.normal* dist;
+               (Physics2D.gravity + (baseParticle.pressionForce + baseParticle.viscosityForce) / baseParticle.density) * detlaTime;
     }
 }

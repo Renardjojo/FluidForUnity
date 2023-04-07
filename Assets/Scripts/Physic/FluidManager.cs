@@ -1,4 +1,4 @@
-using UnityEditor;
+
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -23,9 +23,21 @@ public class FluidManager : MonoBehaviour
         GenerateParticles();
     }
 
-    void Update()
+    void FixedUpdate()
     {
+        for (int i = 0; i < m_particlesCounts; i++)
+        {
+            SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], m_prevParticle, 3f);
+        }
         
+        for (int i = 0; i < m_particlesCounts; i++)
+        {
+            SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], m_prevParticle, 3f);
+            
+            Vector2 prevPos = m_currentParticle[i].pos;
+            SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i], Time.fixedDeltaTime);
+            CheckCollider(prevPos, ref m_currentParticle[i].pos);
+        }
     }
 
     void GenerateParticles()
@@ -36,17 +48,28 @@ public class FluidManager : MonoBehaviour
         for (int i = 0; i < m_particlesCounts; i++)
         {
             Particle newParticle = new Particle();
-            newParticle.pos = GetRandomPointInCircleUniform(); 
+            newParticle.pos = GetRandomPointInCircleUniform(m_spawnPosition, m_spawnRadius); 
             m_prevParticle[i] = newParticle;
         }
     }
     
-    public Vector2 GetRandomPointInCircleUniform()
+    static Vector2 GetRandomPointInCircleUniform(Vector2 center, float radius)
     {
         float t = 2 * Mathf.PI * Random.value;
-        float r = Mathf.Sqrt(Random.value);
+        float r = Mathf.Sqrt(Random.value * radius);
         float x = r * Mathf.Cos(t);
         float y = r * Mathf.Sin(t);
-        return new Vector2(x, y);
+        return center + new Vector2(x, y);
+    }
+    
+    static void CheckCollider(Vector2 prevPos, ref Vector2 nextPos)
+    {
+        float magnitude = (nextPos - prevPos).magnitude;
+        RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos)/magnitude, magnitude );
+        if (!hit) 
+            return;
+        
+        float dist = (nextPos - hit.point).magnitude;
+        nextPos =  hit.point * hit.normal* dist;
     }
 }
