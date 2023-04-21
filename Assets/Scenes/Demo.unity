@@ -397,7 +397,7 @@ EdgeCollider2D:
   m_GameObject: {fileID: 480089704}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: ddde6eae5d41b024dbb181e3157d64b2, type: 2}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -443,10 +443,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 50
+  m_particlesCounts: 1
   m_groupRadius: 0.5
-  m_spawnPosition: {x: 3.0193806, y: 5.7712007}
-  m_spawnRadius: 2
+  m_spawnPosition: {x: 0, y: 1.5}
+  m_spawnRadius: 0
+  m_particuleDescriptor:
+    mass: 0.02
+    viscosityCoef: 3.5
 --- !u!4 &1090033834
 Transform:
   m_ObjectHideFlags: 0
@@ -455,7 +458,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1090033832}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.32, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

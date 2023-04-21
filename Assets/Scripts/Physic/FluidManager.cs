@@ -50,7 +50,7 @@ public class FluidManager : MonoBehaviour
             
             Vector2 prevPos = m_currentParticle[i].pos;
             SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i], Time.fixedDeltaTime);
-            CheckCollider(prevPos, ref m_currentParticle[i].pos);
+            CheckCollider(prevPos, ref m_currentParticle[i].pos, ref m_currentParticle[i].velocity);
         }
 
         m_prevParticle = m_currentParticle;
@@ -106,7 +106,7 @@ public class FluidManager : MonoBehaviour
         return center + new Vector2(x, y);
     }
     
-    static void CheckCollider(Vector2 prevPos, ref Vector2 nextPos)
+    static void CheckCollider(Vector2 prevPos, ref Vector2 nextPos, ref Vector2 currentVelocity)
     {
         float magnitude = (nextPos - prevPos).magnitude;
         RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos)/magnitude, magnitude );
@@ -114,6 +114,7 @@ public class FluidManager : MonoBehaviour
             return;
         
         float dist = (nextPos - hit.point).magnitude;
-        nextPos =  hit.point * hit.normal* dist;
+        currentVelocity = hit.normal * dist * hit.collider.sharedMaterial.bounciness;
+        nextPos = hit.point + currentVelocity;
     }
 }
