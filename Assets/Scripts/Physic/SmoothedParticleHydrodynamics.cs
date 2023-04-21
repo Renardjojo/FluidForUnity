@@ -59,13 +59,17 @@ public class SmoothedParticleHydrodynamics
 
     static float ProcessDensity(Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
+        if (neighbourParticles.Length == 0)
+            return baseParticle.data.mass;
+        
         float sum = 0f;
+        
         for (int i = 0; i < neighbourParticles.Length; i++)
         {
             sum += GetWeightPoly6((neighbourParticles[i].pos - baseParticle.pos).magnitude, radius);
         }
-
-        return baseParticle.mass * sum;
+        
+        return baseParticle.data.mass * sum;
     }
 
     static Vector2 ProcessPression(Particle baseParticle, Particle[] neighbourParticles)
@@ -89,7 +93,7 @@ public class SmoothedParticleHydrodynamics
                    GetDirLaplacien(neighbourParticles[i].pos - baseParticle.pos, radius);
         }
 
-        return -baseParticle.mass * sum;
+        return -baseParticle.data.mass * sum;
     }
 
     static Vector2 ProcessViscosityForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
@@ -101,7 +105,7 @@ public class SmoothedParticleHydrodynamics
                    GetWeightLaplacien((neighbourParticles[i].pos - baseParticle.pos).magnitude, radius);
         }
 
-        return baseParticle.viscosityCoef * baseParticle.mass * sum;
+        return baseParticle.data.viscosityCoef * baseParticle.data.mass * sum;
     }
 
     static Vector2 ProcessVelocity(Particle baseParticle, float detlaTime)

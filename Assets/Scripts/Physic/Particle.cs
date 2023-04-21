@@ -1,11 +1,19 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
+[Serializable]
+public struct ParticuleDescriptor
+{
+    [Min(Single.MinValue)]
+    public float mass; //m
+    [Min(Single.MinValue)]
+    public float viscosityCoef; //μ
+}
 public struct Particle
 {
     public Vector2 pos;
-    public float mass; //m
-    public float viscosityCoef; //μ
 
+    public ParticuleDescriptor data;
     // Current state
     public Vector2 velocity; //u
     public float density; //𝜌

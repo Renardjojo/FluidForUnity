@@ -19,10 +19,20 @@ public class FluidManager : MonoBehaviour
     internal Vector2 m_spawnPosition;
     [SerializeField]
     internal float m_spawnRadius;
+
+    [SerializeField] 
+    private ParticuleDescriptor m_particuleDescriptor;
     
     void Start()
     {
         GenerateParticles();
+        
+        List<Particle>[] neighbours = ProcessNeighbour();
+        
+        for (int i = 0; i < m_particlesCounts; i++)
+        {
+            SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[i], neighbours[i].ToArray(), m_groupRadius);
+        }
     }
 
     void FixedUpdate()
@@ -80,9 +90,8 @@ public class FluidManager : MonoBehaviour
         for (int i = 0; i < m_particlesCounts; i++)
         {
             Particle newParticle = new Particle();
-            newParticle.pos = GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius); 
-            newParticle.mass = 1f; 
-            newParticle.viscosityCoef = 0.1f;
+            newParticle.pos = GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius);
+            newParticle.data = m_particuleDescriptor;
             m_prevParticle[i] = newParticle;
         }
         m_currentParticle = m_prevParticle;
