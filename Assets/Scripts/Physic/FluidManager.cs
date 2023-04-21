@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using Physic;
 using UnityEngine;
@@ -9,7 +10,7 @@ public class FluidManager : MonoBehaviour
     [SerializeField, Min(1)]
     internal int m_particlesCounts;
     
-    [SerializeField, Min(0.1f)]
+    [SerializeField, Min(Single.MinValue)]
     internal float m_groupRadius = 3f;
 
     internal Particle[] m_prevParticle;
@@ -108,17 +109,21 @@ public class FluidManager : MonoBehaviour
     
     static void CheckCollider(Vector2 prevPos, ref Vector2 nextPos, ref Vector2 currentVelocity)
     {
-        float magnitude = (nextPos - prevPos).magnitude;
-        RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos)/magnitude, magnitude );
-        if (!hit) 
-            return;
-        
-        float dist = (nextPos - hit.point).magnitude;
-        float velocityMagnitude = currentVelocity.magnitude;
-        
-        Vector2 newDir = Vector2.Reflect(currentVelocity / velocityMagnitude, hit.normal);
-        currentVelocity = currentVelocity.magnitude * newDir * hit.collider.sharedMaterial.bounciness;
-        
-        nextPos = hit.point + newDir * dist;
+        const int MAX_ITERATION = 5;
+        for (int i = 0; i < MAX_ITERATION; i++)
+        {
+            float magnitude = (nextPos - prevPos).magnitude;
+            RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos) / magnitude, magnitude);
+            if (!hit)
+                return;
+
+            float dist = (nextPos - hit.point).magnitude;
+            float velocityMagnitude = currentVelocity.magnitude;
+
+            Vector2 newDir = Vector2.Reflect(currentVelocity / velocityMagnitude, hit.normal);
+            currentVelocity = currentVelocity.magnitude * newDir * hit.collider.sharedMaterial.bounciness;
+
+            nextPos = hit.point + newDir * dist;
+        }
     }
 }
