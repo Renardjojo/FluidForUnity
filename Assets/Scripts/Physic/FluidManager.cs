@@ -100,7 +100,7 @@ public class FluidManager : MonoBehaviour
     static Vector2 GetRandomPointInCircleUniform(Vector2 center, float radius)
     {
         float t = 2 * Mathf.PI * Random.value;
-        float r = Mathf.Sqrt(Random.value * radius);
+        float r = Mathf.Sqrt(Random.value) * radius;
         float x = r * Mathf.Cos(t);
         float y = r * Mathf.Sin(t);
         return center + new Vector2(x, y);
