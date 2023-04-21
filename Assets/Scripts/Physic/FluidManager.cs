@@ -53,7 +53,7 @@ public class FluidManager : MonoBehaviour
             CheckCollider(prevPos, ref m_currentParticle[i].pos);
         }
 
-        m_currentParticle = m_prevParticle;
+        m_prevParticle = m_currentParticle;
     }
 
     List<Particle>[] ProcessNeighbour()
