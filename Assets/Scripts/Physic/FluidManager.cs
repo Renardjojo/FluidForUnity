@@ -114,7 +114,11 @@ public class FluidManager : MonoBehaviour
             return;
         
         float dist = (nextPos - hit.point).magnitude;
-        currentVelocity = hit.normal * dist * hit.collider.sharedMaterial.bounciness;
-        nextPos = hit.point + currentVelocity;
+        float velocityMagnitude = currentVelocity.magnitude;
+        
+        Vector2 newDir = Vector2.Reflect(currentVelocity / velocityMagnitude, hit.normal);
+        currentVelocity = currentVelocity.magnitude * newDir * hit.collider.sharedMaterial.bounciness;
+        
+        nextPos = hit.point + newDir * dist;
     }
 }
