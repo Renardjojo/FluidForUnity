@@ -12,7 +12,6 @@ public class FluidManager : MonoBehaviour
     [Header("Stability")]
     [SerializeField, Min(1)] internal int m_subDivision = 4;
     [SerializeField, Min(Single.MinValue)] internal float m_minDensity = 0.1f;
-    [SerializeField, Min(Single.MinValue)] internal float m_maxPressure = 10f;
     [SerializeField, Min(Single.MinValue)] internal float m_maxPressureForce = 10f;
 
     [SerializeField, Min(Single.MinValue)] internal float m_groupRadius = 3f;
@@ -36,10 +35,9 @@ public class FluidManager : MonoBehaviour
         for (int i = 0; i < m_particlesCounts; i++)
         {
             SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[i], neighbours[i].ToArray(),
-                m_groupRadius, m_minDensity, m_maxPressure);
+                m_groupRadius, m_minDensity);
         }
-
-        m_maxPressure /= m_subDivision;
+        
         m_maxPressureForce /= m_subDivision;
     }
 
@@ -52,7 +50,7 @@ public class FluidManager : MonoBehaviour
             for (int i = 0; i < m_particlesCounts; i++)
             {
                 SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], neighbours[i].ToArray(),
-                    m_groupRadius, m_minDensity, m_maxPressure);
+                    m_groupRadius, m_minDensity);
             }
 
             for (int i = 0; i < m_particlesCounts; i++)
