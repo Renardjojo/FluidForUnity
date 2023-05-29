@@ -3,14 +3,13 @@ using Vector2 = UnityEngine.Vector2;
 
 public class SmoothedParticleHydrodynamics
 {
-    public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius, float minDensity, float maxPressure)
+    public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius, float minDensity)
     {
         baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius);
         baseParticle.pression = ProcessPressure(baseParticle);
         
         // Clamp pressure to stabilize physic
         baseParticle.density = Mathf.Max(baseParticle.density, minDensity);
-        baseParticle.pression = Mathf.Clamp(baseParticle.pression, -maxPressure, maxPressure);
     }
     
     public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
@@ -76,6 +75,7 @@ public class SmoothedParticleHydrodynamics
 
     static float ProcessPressure(Particle baseParticle)
     {
+        Debug.Log($"{baseParticle.density - baseParticle.data.baseDensity}");
         return baseParticle.data.gazStiffness * (baseParticle.density - baseParticle.data.baseDensity);
     }
 
