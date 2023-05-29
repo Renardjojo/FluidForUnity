@@ -34,7 +34,7 @@ public class FluidManager : MonoBehaviour
         for (int i = 0; i < m_particlesCounts; i++)
         {
             SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[i], neighbours[i].ToArray(),
-                m_groupRadius);
+                m_groupRadius, m_minDensity, m_maxPressure);
         }
 
         m_maxPressure /= m_subDivision;
@@ -50,10 +50,7 @@ public class FluidManager : MonoBehaviour
             for (int i = 0; i < m_particlesCounts; i++)
             {
                 SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], neighbours[i].ToArray(),
-                    m_groupRadius);
-                // Clamp pressure to stabilize physic
-                m_currentParticle[i].density = Mathf.Max(m_currentParticle[i].density, m_minDensity);
-                m_currentParticle[i].pression = Mathf.Clamp(m_currentParticle[i].pression, -m_maxPressure, m_maxPressure);
+                    m_groupRadius, m_minDensity, m_maxPressure);
             }
 
             for (int i = 0; i < m_particlesCounts; i++)

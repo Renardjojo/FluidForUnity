@@ -367,12 +367,12 @@ GameObject:
   - component: {fileID: 480089705}
   - component: {fileID: 480089706}
   m_Layer: 0
-  m_Name: Ground
+  m_Name: Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &480089705
 Transform:
   m_ObjectHideFlags: 0
@@ -445,12 +445,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 100
+  m_particlesCounts: 2
   m_subDivision: 1
-  m_minDensity: 0.1
-  m_maxPressure: 1
-  m_maxPressureForce: 1
-  m_groupRadius: 0.0457
+  m_minDensity: 0.01
+  m_maxPressure: 10
+  m_maxPressureForce: 10
+  m_groupRadius: 10
   m_spawnPosition: {x: 0, y: 3}
   m_spawnRadius: 1
   m_particuleDescriptor:
@@ -502,6 +502,61 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 480089705}
+  - {fileID: 1878646003}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1878646002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1878646003}
+  - component: {fileID: 1878646004}
+  m_Layer: 0
+  m_Name: Ground
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1878646003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878646002}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1449825657}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!68 &1878646004
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878646002}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 6200000, guid: ddde6eae5d41b024dbb181e3157d64b2, type: 2}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -25, y: 0}
+  - {x: 25, y: 0}
+  m_AdjacentStartPoint: {x: 0, y: 8}
+  m_AdjacentEndPoint: {x: 0, y: 8}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
