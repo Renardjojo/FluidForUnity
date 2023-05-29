@@ -406,8 +406,8 @@ EdgeCollider2D:
   m_Points:
   - {x: -5, y: 5}
   - {x: -4, y: 2.5}
-  - {x: -1, y: 0}
-  - {x: 1, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   - {x: 4, y: 2.5}
   - {x: 5, y: 5}
   - {x: 0, y: 8}
@@ -445,12 +445,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 25
-  m_subDivision: 10
-  m_maxPressure: 100
+  m_particlesCounts: 100
+  m_subDivision: 1
+  m_minDensity: 0.1
+  m_maxPressure: 1
+  m_maxPressureForce: 1
   m_groupRadius: 0.0457
   m_spawnPosition: {x: 0, y: 3}
-  m_spawnRadius: 0.01
+  m_spawnRadius: 1
   m_particuleDescriptor:
     mass: 0.02
     viscosityCoef: 3.5

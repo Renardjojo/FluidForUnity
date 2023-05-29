@@ -11,7 +11,9 @@ public class FluidManager : MonoBehaviour
     
     [Header("Stability")]
     [SerializeField, Min(1)] internal int m_subDivision = 4;
+    [SerializeField, Min(Single.MinValue)] internal float m_minDensity = 0.1f;
     [SerializeField, Min(Single.MinValue)] internal float m_maxPressure = 10f;
+    [SerializeField, Min(Single.MinValue)] internal float m_maxPressureForce = 10f;
 
     [SerializeField, Min(Single.MinValue)] internal float m_groupRadius = 3f;
 
@@ -34,6 +36,9 @@ public class FluidManager : MonoBehaviour
             SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[i], neighbours[i].ToArray(),
                 m_groupRadius);
         }
+
+        m_maxPressure /= m_subDivision;
+        m_maxPressureForce /= m_subDivision;
     }
 
     void FixedUpdate()
@@ -46,7 +51,9 @@ public class FluidManager : MonoBehaviour
             {
                 SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], neighbours[i].ToArray(),
                     m_groupRadius);
-                m_currentParticle[i].pression = Mathf.Min(m_currentParticle[i].pression, m_maxPressure);
+                // Clamp pressure to stabilize physic
+                m_currentParticle[i].density = Mathf.Max(m_currentParticle[i].density, m_minDensity);
+                m_currentParticle[i].pression = Mathf.Clamp(m_currentParticle[i].pression, -m_maxPressure, m_maxPressure);
             }
 
             for (int i = 0; i < m_particlesCounts; i++)
@@ -54,8 +61,16 @@ public class FluidManager : MonoBehaviour
                 SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], neighbours[i].ToArray(),
                     m_groupRadius);
 
+                // Clamp pressure force to stabilize physic
+                if (m_currentParticle[i].pressionForce.sqrMagnitude > m_maxPressureForce * m_maxPressureForce)
+                    m_currentParticle[i].pressionForce = m_currentParticle[i].pressionForce.normalized * m_maxPressureForce;
+                
+                if (m_currentParticle[i].viscosityForce.sqrMagnitude > m_maxPressureForce * m_maxPressureForce)
+                    m_currentParticle[i].viscosityForce = m_currentParticle[i].viscosityForce.normalized * m_maxPressureForce;
+
                 Vector2 prevPos = m_currentParticle[i].pos;
                 SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i], Time.fixedDeltaTime / m_subDivision);
+
                 CheckCollider(prevPos, ref m_currentParticle[i].pos, ref m_currentParticle[i].velocity);
             }
 
