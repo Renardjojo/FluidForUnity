@@ -22,11 +22,13 @@ public class FluidManager : MonoBehaviour
 
     [SerializeField] 
     private ParticuleDescriptor m_particuleDescriptor;
+
+    [SerializeField] private ParticuleRenderer m_particuleRenderer;
     
     void Start()
     {
         GenerateParticles();
-        
+        m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
         List<Particle>[] neighbours = ProcessNeighbour();
         
         for (int i = 0; i < m_particlesCounts; i++)
@@ -52,7 +54,7 @@ public class FluidManager : MonoBehaviour
             SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i], Time.fixedDeltaTime);
             CheckCollider(prevPos, ref m_currentParticle[i].pos, ref m_currentParticle[i].velocity);
         }
-
+        m_particuleRenderer.Update(m_particlesCounts);
         m_prevParticle = m_currentParticle;
     }
 
