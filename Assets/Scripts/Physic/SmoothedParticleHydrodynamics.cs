@@ -3,17 +3,19 @@ using Vector2 = UnityEngine.Vector2;
 
 public class SmoothedParticleHydrodynamics
 {
-    static float waterVolumicMass = 997f;
-
-    public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
+    public static void UpdateParticleDensity(ref Particle baseParticle, Particle[] neighbourParticles, float radius, float minDensity, float maxPressure)
     {
         baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius);
-        baseParticle.pression = ProcessPression(baseParticle, neighbourParticles);
+        baseParticle.pression = ProcessPressure(baseParticle);
+        
+        // Clamp pressure to stabilize physic
+        baseParticle.density = Mathf.Max(baseParticle.density, minDensity);
+        baseParticle.pression = Mathf.Clamp(baseParticle.pression, -maxPressure, maxPressure);
     }
     
     public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
-        baseParticle.pressionForce = ProcessPressionForce(baseParticle, neighbourParticles, radius);
+        baseParticle.pressionForce = ProcessPressureForce(baseParticle, neighbourParticles, radius);
         baseParticle.viscosityForce = ProcessViscosityForce(baseParticle, neighbourParticles, radius);
     }
     
@@ -72,19 +74,12 @@ public class SmoothedParticleHydrodynamics
         return baseParticle.data.mass * sum;
     }
 
-    static Vector2 ProcessPression(Particle baseParticle, Particle[] neighbourParticles)
+    static float ProcessPressure(Particle baseParticle)
     {
-        Vector2 k = Vector2.zero;
-        for (int i = 0; i < neighbourParticles.Length; i++)
-        {
-            k += baseParticle.pos - neighbourParticles[i].pos;
-        }
-
-        //p0 = waterVolumicMass ? maybe 
-        return k.normalized * (baseParticle.density - waterVolumicMass);
+        return baseParticle.data.gazStiffness * (baseParticle.density - baseParticle.data.baseDensity);
     }
 
-    static Vector2 ProcessPressionForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
+    static Vector2 ProcessPressureForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
     {
         Vector2 sum = Vector2.zero;
         for (int i = 0; i < neighbourParticles.Length; i++)
