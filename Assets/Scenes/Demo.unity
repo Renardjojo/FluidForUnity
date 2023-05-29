@@ -410,8 +410,10 @@ EdgeCollider2D:
   - {x: 1, y: 0}
   - {x: 4, y: 2.5}
   - {x: 5, y: 5}
-  m_AdjacentStartPoint: {x: 0, y: 0}
-  m_AdjacentEndPoint: {x: 0, y: 0}
+  - {x: 0, y: 8}
+  - {x: -5, y: 5}
+  m_AdjacentStartPoint: {x: 0, y: 8}
+  m_AdjacentEndPoint: {x: 0, y: 8}
   m_UseAdjacentStartPoint: 0
   m_UseAdjacentEndPoint: 0
 --- !u!1 &1090033832
@@ -443,10 +445,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 100
-  m_groupRadius: 0.1
+  m_particlesCounts: 25
+  m_subDivision: 10
+  m_maxPressure: 100
+  m_groupRadius: 0.0457
   m_spawnPosition: {x: 0, y: 3}
-  m_spawnRadius: 1
+  m_spawnRadius: 0.01
   m_particuleDescriptor:
     mass: 0.02
     viscosityCoef: 3.5
