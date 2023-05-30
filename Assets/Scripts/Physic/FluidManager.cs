@@ -7,22 +7,28 @@ using Random = UnityEngine.Random;
 
 public class FluidManager : MonoBehaviour
 {
-    [SerializeField, Min(1)] internal int m_particlesCounts;
-    
-    [Header("Stability")]
-    [SerializeField, Min(1)] internal int m_subDivision = 4;
-    [SerializeField, Min(Single.MinValue)] internal float m_minDensity = 0.1f;
-    [SerializeField, Min(Single.MinValue)] internal float m_maxPressureForce = 10f;
+    [Header("Simulation")] [SerializeField, Min(1)]
+    internal int m_particlesCounts;
 
     [SerializeField, Min(Single.MinValue)] internal float m_groupRadius = 3f;
+    [SerializeField] private ParticuleDescriptor m_particuleDescriptor;
 
-    internal Particle[] m_prevParticle;
-    internal Particle[] m_currentParticle;
+    [Header("Stability")] [SerializeField, Min(1)]
+    internal int m_subDivision = 4;
 
+    [SerializeField, Min(1)] internal int m_maxCollisionRecursion = 4;
+    [SerializeField, Min(0f)] internal float m_collisionEpsilonOffset = 0.01f;
+    [SerializeField, Min(Single.MinValue)] internal float m_maxVelocity = 10f;
+    [SerializeField, Min(Single.MinValue)] internal float m_maxDensity = 10f;
+
+    [Header("Spawner")] 
     [SerializeField] internal Vector2 m_spawnPosition;
     [SerializeField] internal float m_spawnRadius;
 
-    [SerializeField] private ParticuleDescriptor m_particuleDescriptor;
+    [Header("Debug")] 
+    public float timeScale = 1f;
+    internal Particle[] m_prevParticle;
+    internal Particle[] m_currentParticle;
 
     [SerializeField] private ParticuleRenderer m_particuleRenderer = new ();
 
@@ -35,14 +41,16 @@ public class FluidManager : MonoBehaviour
         for (int i = 0; i < m_particlesCounts; i++)
         {
             SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[i], neighbours[i].ToArray(),
-                m_groupRadius, m_minDensity);
+                m_groupRadius, m_maxDensity);
         }
-        
-        m_maxPressureForce /= m_subDivision;
+
+        m_maxVelocity /= m_subDivision;
     }
 
-    void FixedUpdate()
+    void Update()
     {
+        Time.timeScale = timeScale;
+
         for (int step = 0; step < m_subDivision; step++)
         {
             List<Particle>[] neighbours = ProcessNeighbour();
@@ -50,7 +58,7 @@ public class FluidManager : MonoBehaviour
             for (int i = 0; i < m_particlesCounts; i++)
             {
                 SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], neighbours[i].ToArray(),
-                    m_groupRadius, m_minDensity);
+                    m_groupRadius, m_maxDensity);
             }
 
             for (int i = 0; i < m_particlesCounts; i++)
@@ -58,24 +66,15 @@ public class FluidManager : MonoBehaviour
                 SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], neighbours[i].ToArray(),
                     m_groupRadius);
 
-                // Clamp pressure force to stabilize physic
-                if (m_currentParticle[i].pressionForce.sqrMagnitude > m_maxPressureForce * m_maxPressureForce)
-                    m_currentParticle[i].pressionForce = m_currentParticle[i].pressionForce.normalized * m_maxPressureForce;
-                
-                if (m_currentParticle[i].viscosityForce.sqrMagnitude > m_maxPressureForce * m_maxPressureForce)
-                    m_currentParticle[i].viscosityForce = m_currentParticle[i].viscosityForce.normalized * m_maxPressureForce;
-
                 Vector2 prevPos = m_currentParticle[i].pos;
-                SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i], Time.fixedDeltaTime / m_subDivision);
+                SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i],
+                    Time.deltaTime / m_subDivision,  m_maxVelocity);
 
                 CheckCollider(prevPos, ref m_currentParticle[i].pos, ref m_currentParticle[i].velocity);
             }
+
             m_prevParticle = m_currentParticle;
         }
-    }
-
-    private void Update()
-    {
         m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
         m_particuleRenderer.Update(m_particlesCounts);
     }
@@ -87,7 +86,7 @@ public class FluidManager : MonoBehaviour
 
         for (int i = 0; i < m_particlesCounts; i++)
         {
-            particleNeighbour[i] = new List<Particle>();
+            particleNeighbour[i] = new List<Particle>(m_particlesCounts - 1);
             Vector2 currentParticlePos = m_prevParticle[i].pos;
 
             for (int j = 0; j < m_particlesCounts; j++)
@@ -132,10 +131,9 @@ public class FluidManager : MonoBehaviour
         return center + new Vector2(x, y);
     }
 
-    static void CheckCollider(Vector2 prevPos, ref Vector2 nextPos, ref Vector2 currentVelocity)
+    void CheckCollider(Vector2 prevPos, ref Vector2 nextPos, ref Vector2 currentVelocity)
     {
-        const int MAX_ITERATION = 5;
-        for (int i = 0; i < MAX_ITERATION; i++)
+        for (int i = 0; i < m_maxCollisionRecursion; i++)
         {
             float magnitude = (nextPos - prevPos).magnitude;
             RaycastHit2D hit = Physics2D.Raycast(prevPos, (nextPos - prevPos) / magnitude, magnitude);
@@ -146,8 +144,10 @@ public class FluidManager : MonoBehaviour
             float velocityMagnitude = currentVelocity.magnitude;
 
             Vector2 newDir = Vector2.Reflect(currentVelocity / velocityMagnitude, hit.normal);
-            currentVelocity = currentVelocity.magnitude * newDir * hit.collider.sharedMaterial.bounciness;
+            currentVelocity = newDir * currentVelocity.magnitude * hit.collider.sharedMaterial.bounciness;
 
+
+            prevPos = hit.point + hit.normal * m_collisionEpsilonOffset;
             nextPos = hit.point + newDir * dist;
         }
     }

@@ -201,7 +201,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -40}
+  m_LocalPosition: {x: 0, y: 1, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -372,7 +372,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &480089705
 Transform:
   m_ObjectHideFlags: 0
@@ -402,7 +402,7 @@ EdgeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_EdgeRadius: 0
+  m_EdgeRadius: 0.1
   m_Points:
   - {x: -5, y: 5}
   - {x: -4, y: 2.5}
@@ -445,19 +445,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 2
-  m_subDivision: 4
-  m_minDensity: 0.1
-  m_maxPressure: 10
-  m_maxPressureForce: 10
-  m_groupRadius: 10
-  m_spawnPosition: {x: 0, y: 3}
-  m_spawnRadius: 1
+  m_particlesCounts: 20
+  m_groupRadius: 2
   m_particuleDescriptor:
-    mass: 0.02
-    viscosityCoef: 3.5
-    gazStiffness: 0
-    baseDensity: 0
+    mass: 1
+    viscosityCoef: 0.25
+    gazStiffness: 2000
+    baseDensity: 2
+  m_subDivision: 1
+  m_maxCollisionRecursion: 4
+  m_collisionEpsilonOffset: 0.01
+  m_maxVelocity: 10000
+  m_maxDensity: 10000
+  m_spawnPosition: {x: 0, y: 3}
+  m_spawnRadius: 0.1
+  timeScale: 0.2
+  m_particuleRenderer:
+    material: {fileID: 2100000, guid: ee5fea81fe8e18144892ed0928517179, type: 2}
+    mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+    Scale: {x: 0.1, y: 0.1, z: 0.1}
 --- !u!4 &1090033834
 Transform:
   m_ObjectHideFlags: 0
@@ -520,7 +526,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd035b95e5fb34f45bf07f81d0739679, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collider: {fileID: 1878646004}
+  collider: {fileID: 480089706}
   ln: {fileID: 1449825659}
 --- !u!120 &1449825659
 LineRenderer:
@@ -637,7 +643,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1878646003
 Transform:
   m_ObjectHideFlags: 0
@@ -667,7 +673,7 @@ EdgeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_EdgeRadius: 0
+  m_EdgeRadius: 0.1
   m_Points:
   - {x: -25, y: 0}
   - {x: 25, y: 0}
