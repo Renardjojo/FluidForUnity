@@ -25,10 +25,12 @@ public class FluidManager : MonoBehaviour
 
     [SerializeField] private ParticuleDescriptor m_particuleDescriptor;
 
+    [SerializeField] private ParticuleRenderer m_particuleRenderer = new ();
+
     void Start()
     {
         GenerateParticles();
-
+        m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
         List<Particle>[] neighbours = ProcessNeighbour();
 
         for (int i = 0; i < m_particlesCounts; i++)
@@ -70,9 +72,14 @@ public class FluidManager : MonoBehaviour
 
                 CheckCollider(prevPos, ref m_currentParticle[i].pos, ref m_currentParticle[i].velocity);
             }
-
             m_prevParticle = m_currentParticle;
         }
+    }
+
+    private void Update()
+    {
+        m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
+        m_particuleRenderer.Update(m_particlesCounts);
     }
 
     List<Particle>[] ProcessNeighbour()

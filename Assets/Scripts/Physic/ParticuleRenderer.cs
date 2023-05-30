@@ -13,26 +13,11 @@ public class ParticuleRenderer
     //private MaterialPropertyBlock block = new ();
     
     
-    private Mesh mesh = new ();
-
-    private Mesh CreateQuad(float width = 1f, float height = 1f) 
-    {
-        Vector3[] vertices = new Vector3[4]
-        {
-            new (0, 0, 0),
-            new (width, 0, 0),
-            new (0, height, 0),
-            new (width, height, 0)
-        };
-        Mesh newMesh =  new Mesh();
-        newMesh.vertices = vertices;
-        return newMesh;
-    }
+    public Mesh mesh;
+    public Vector3 Scale =Vector3.one;
     
     public void setup(int population, Particle[] particles)
     {
-        mesh = CreateQuad();
-        
         
         matrices = new Matrix4x4[population];
         Vector4[] colors = new Vector4[population];
@@ -43,7 +28,7 @@ public class ParticuleRenderer
             // Build matrix.
             Vector3 position = particles[i].pos;
             Quaternion rotation = Quaternion.identity;
-            Vector3 scale = Vector3.one;
+            Vector3 scale = Scale;
 
             matrices[i] = Matrix4x4.TRS(position, rotation, scale);
 
