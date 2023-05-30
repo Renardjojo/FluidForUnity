@@ -406,8 +406,8 @@ EdgeCollider2D:
   m_Points:
   - {x: -5, y: 5}
   - {x: -4, y: 2.5}
-  - {x: -1, y: 0}
-  - {x: 1, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   - {x: 4, y: 2.5}
   - {x: 5, y: 5}
   - {x: 0, y: 8}
@@ -445,25 +445,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 100
-  m_groupRadius: 0.5
+  m_particlesCounts: 1000
+  m_groupRadius: 0.0475
   m_particuleDescriptor:
     mass: 0.02
     viscosityCoef: 3.5
-    gazStiffness: 3
-    baseDensity: 2
+    gazStiffness: 500
+    baseDensity: 0.59
   m_subDivision: 1
   m_maxCollisionRecursion: 4
   m_collisionEpsilonOffset: 0.01
-  m_maxVelocity: 100
+  m_maxVelocity: 1
   m_maxDensity: 10000
   m_spawnPosition: {x: 0, y: 3}
   m_spawnRadius: 1
-  timeScale: 0.1
+  timeScale: 0.5
   m_particuleRenderer:
     material: {fileID: 2100000, guid: ee5fea81fe8e18144892ed0928517179, type: 2}
     mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
     Scale: {x: 0.1, y: 0.1, z: 0.1}
+  m_timeMax: 5
 --- !u!4 &1090033834
 Transform:
   m_ObjectHideFlags: 0
@@ -490,6 +491,7 @@ GameObject:
   - component: {fileID: 1449825657}
   - component: {fileID: 1449825659}
   - component: {fileID: 1449825658}
+  - component: {fileID: 1449825660}
   m_Layer: 0
   m_Name: Container
   m_TagString: Untagged
@@ -625,8 +627,22 @@ LineRenderer:
     textureMode: 0
     shadowBias: 0.5
     generateLightingData: 0
-  m_UseWorldSpace: 1
+  m_UseWorldSpace: 0
   m_Loop: 0
+--- !u!114 &1449825660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1449825656}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e14412bec656cea4aa5473fc5de0a148, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 1
+  amplitude: 10
 --- !u!1 &1878646002
 GameObject:
   m_ObjectHideFlags: 0
