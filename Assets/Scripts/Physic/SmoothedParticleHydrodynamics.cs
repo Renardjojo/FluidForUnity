@@ -8,28 +8,17 @@ public class SmoothedParticleHydrodynamics
     {
         baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius, maxDensity);
         baseParticle.pression = ProcessPressure(baseParticle);
-        if (float.IsNaN(baseParticle.density) || float.IsNaN(baseParticle.pression))
-            Debug.Log("ok");
     }
 
     public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius, float maxVelocity)
     {
         baseParticle.force = ProcessForces(baseParticle, neighbourParticles, radius, maxVelocity);
-        if (float.IsNaN(baseParticle.force.x) || float.IsNaN(baseParticle.force.y))
-            Debug.Log("ok");
-        //baseParticle.pressionForce = ProcessPressureForce(baseParticle, neighbourParticles, radius);
-        //baseParticle.viscosityForce = ProcessViscosityForce(baseParticle, neighbourParticles, radius);
     }
 
     public static void UpdateParticleVelocity(ref Particle baseParticle, float detlaTime, float maxVelocity)
     {
         baseParticle.velocity = ProcessVelocity(baseParticle, detlaTime, maxVelocity);
-        
-        if (float.IsNaN(baseParticle.velocity.x) || float.IsNaN(baseParticle.velocity.y))
-            Debug.Log("ok");
         baseParticle.pos += baseParticle.velocity * detlaTime;
-        if (float.IsNaN(baseParticle.pos.x) || float.IsNaN(baseParticle.pos.y))
-            Debug.Log("ok");
     }
 
     // r = distance, h = radius
@@ -43,40 +32,6 @@ public class SmoothedParticleHydrodynamics
         float x = 1.0f - distanceSquared / (radius * radius);
         return 315f / (64f * Mathf.PI * (radius * radius * radius)) * x * x * x;
     }
-
-    // r = distance, h = radius
-    // Usefull for density
-    //static float GetWeightPoly6(float dist, float radius)
-    //{
-    //    if (dist > radius)
-    //        return 0;
-    //
-    //    return 315f / (64f * Mathf.PI * Mathf.Pow(radius, 9)) * Mathf.Pow(radius * radius - dist * dist, 3);
-    //}
-    
-    //// r = distance, h = radius
-    //// Usefull for pression
-    //static float GetWeightSpiky(float dist, float radius)
-    //{
-    //    if (dist > radius)
-    //        return 0f;
-    //
-    //    return 15f * Mathf.Pow(radius - dist, 3) / (Mathf.PI * Mathf.Pow(radius, 6));
-    //}
-    //
-    //// r = distance, h = radius
-    //// Usefull for viscosity
-    //static Vector2 GetDirLaplacien(Vector2 offset, float radius)
-    //{
-    //    return -45f * offset.normalized * (radius - offset.magnitude) / (Mathf.PI * Mathf.Pow(radius, 6));
-    //}
-    //
-    //// r = distance, h = radius
-    //// Usefull for viscosity
-    //static float GetWeightLaplacien(float dist, float radius)
-    //{
-    //    return 45f / (Mathf.PI * Mathf.Pow(radius, 6)) * (radius - dist);
-    //}
 
     static Vector2 PressureForceKernel(float distance, float radius, Vector2 directionFromCenter)
     {
@@ -136,38 +91,8 @@ public class SmoothedParticleHydrodynamics
             }
         }
         
-        if (float.IsNaN(pressureForce.x) || float.IsNaN(pressureForce.y))
-            Debug.Log("ok");
-        
-        if (float.IsNaN(viscosityForce.x) || float.IsNaN(viscosityForce.y))
-            Debug.Log("ok");
-
-        return Physics2D.gravity + Vector2.ClampMagnitude(pressureForce + viscosityForce, maxVelocity);
+        return Physics2D.gravity * baseParticle.data.mass + Vector2.ClampMagnitude(pressureForce + viscosityForce, maxVelocity);
     }
-
-    //static Vector2 ProcessPressureForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
-    //{
-    //    Vector2 sum = Vector2.zero;
-    //    for (int i = 0; i < neighbourParticles.Length; i++)
-    //    {
-    //        sum += (baseParticle.pression + neighbourParticles[i].pression) / (2f * neighbourParticles[i].density) *
-    //               GetDirLaplacien(baseParticle.pos - neighbourParticles[i].pos, radius);
-    //    }
-    //
-    //    return -baseParticle.data.mass * sum;
-    //}
-    //
-    //static Vector2 ProcessViscosityForce(Particle baseParticle, Particle[] neighbourParticles, float radius)
-    //{
-    //    Vector2 sum = Vector2.zero;
-    //    for (int i = 0; i < neighbourParticles.Length; i++)
-    //    {
-    //        sum += (neighbourParticles[i].velocity - baseParticle.velocity) / neighbourParticles[i].density *
-    //               GetWeightLaplacien((baseParticle.pos - neighbourParticles[i].pos).magnitude, radius);
-    //    }
-    //
-    //    return baseParticle.data.viscosityCoef * baseParticle.data.mass * sum;
-    //}
 
     static Vector2 ProcessVelocity(Particle baseParticle, float detlaTime, float maxVelocity)
     {
