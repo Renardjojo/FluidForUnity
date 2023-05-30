@@ -40,9 +40,17 @@ public class FluidManager : MonoBehaviour
     List<Particle>[] particleNeighbour;
     [SerializeField] private float m_timeMax = 5;
 
+    
+    float currentTime = 0;
+    float currentTimeSpawn = 0;
+    bool firstLoop = true;
+    
     void Start()
     {
-        StartCoroutine(GenerateParticles());
+        m_prevParticle = new Particle[m_particlesCounts];
+        m_currentParticle = new Particle[m_particlesCounts];
+        
+        
         m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
         
         particleNeighbour = new List<Particle>[m_particlesCounts];
@@ -59,6 +67,22 @@ public class FluidManager : MonoBehaviour
 
     void Update()
     {
+        if (m_currentParticulesCounts < m_particlesCounts)
+        {
+            currentTime += Time.deltaTime;
+            currentTimeSpawn += Time.deltaTime;
+
+            if (firstLoop || currentTimeSpawn >= m_timeMax / m_particlesCounts)
+            {
+                GenerateParticles();
+                currentTimeSpawn = 0;
+
+                if (firstLoop)
+                    firstLoop = false;
+
+            }
+        }
+        
         Time.timeScale = timeScale;
 
         for (int step = 0; step < m_subDivision; step++)
@@ -113,62 +137,41 @@ public class FluidManager : MonoBehaviour
         }
     }
 
-    IEnumerator GenerateParticles()
+    void GenerateParticles()
     {
-        m_prevParticle = new Particle[m_particlesCounts];
-        m_currentParticle = new Particle[m_particlesCounts];
+        Particle newParticle = new Particle();
+        newParticle.pos =
+            GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius);
+        newParticle.data = m_particuleDescriptor;
+        if (float.IsNaN(newParticle.velocity.x) || float.IsNaN(newParticle.velocity.y))
+            Debug.Log("ok");
+            
+        m_prevParticle[m_currentParticulesCounts] = newParticle;
+        m_currentParticulesCounts += 1;
 
-        float currentTime = 0;
-        float currentTimeSpawn = 0;
-        bool firstLoop = true;
-        while (currentTime < m_timeMax)
+
+
+        m_currentParticle = m_prevParticle;
+
+        List<Particle> neighbour = new List<Particle>();
+        float sqGroupRadius = m_groupRadius * m_groupRadius;
+            
+           // -1 Don't include self
+        for (int j = 0; j < m_currentParticulesCounts-1; j++)
         {
-            currentTime += Time.deltaTime;
-            currentTimeSpawn += Time.deltaTime;
 
-            if (!firstLoop && currentTimeSpawn < m_timeMax / m_particlesCounts)
-                continue;
-
-            Particle newParticle = new Particle();
-            newParticle.pos =
-                GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius);
-            newParticle.data = m_particuleDescriptor;
-            if (float.IsNaN(newParticle.velocity.x) || float.IsNaN(newParticle.velocity.y))
-                Debug.Log("ok");
             
-            m_prevParticle[m_currentParticulesCounts] = newParticle;
-            m_currentParticulesCounts += 1;
+            Vector2 currentParticlePos = m_prevParticle[m_currentParticulesCounts-1].pos;
 
-            currentTimeSpawn = 0;
-
-            if (firstLoop)
-                firstLoop = false;
-
-            if (m_currentParticulesCounts == m_particlesCounts)
-                break;
-
-            m_currentParticle = m_prevParticle;
-
-            List<Particle> neighbour = new List<Particle>();
-            float sqGroupRadius = m_groupRadius * m_groupRadius;
-            
-            // -1 Don't include self
-            for (int j = 0; j < m_currentParticulesCounts - 1; j++)
+            if ((currentParticlePos - m_prevParticle[j].pos).sqrMagnitude < sqGroupRadius)
             {
-                Vector2 currentParticlePos = m_prevParticle[m_currentParticulesCounts].pos;
-
-                if ((currentParticlePos - m_prevParticle[j].pos).sqrMagnitude < sqGroupRadius)
-                {
-                    neighbour.Add(m_prevParticle[j]);
-                }
+                neighbour.Add(m_prevParticle[j]);
             }
+        }
 
             //Update value particule
-            SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[m_currentParticulesCounts - 1], neighbour.ToArray(),
-                m_groupRadius, m_maxDensity);
-
-            yield return null;
-        }
+        SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[m_currentParticulesCounts - 1], neighbour.ToArray(),
+            m_groupRadius, m_maxDensity);
     }
     
     static Vector2 GetRandomPointInCircleUniform(Vector2 center, float radius)
