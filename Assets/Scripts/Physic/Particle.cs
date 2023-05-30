@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-public struct ParticuleDescriptor
+public class ParticuleDescriptor
 {
     [Min(Single.MinValue)]
     public float mass; //m
@@ -25,4 +25,5 @@ public struct Particle
     public float pression; //P 
     public Vector2 pressionForce; //Fp
     public Vector2 viscosityForce; //Fv
+    public Vector2 force; //Fv
 }
