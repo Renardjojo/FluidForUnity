@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Physic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -8,6 +10,7 @@ using Random = UnityEngine.Random;
 public class FluidManager : MonoBehaviour
 {
     [SerializeField, Min(1)] internal int m_particlesCounts;
+    private int m_currentParticulesCounts = 0;
     
     [Header("Stability")]
     [SerializeField, Min(1)] internal int m_subDivision = 4;
@@ -26,18 +29,20 @@ public class FluidManager : MonoBehaviour
     [SerializeField] private ParticuleDescriptor m_particuleDescriptor;
 
     [SerializeField] private ParticuleRenderer m_particuleRenderer = new ();
+    
+    [SerializeField] private float m_timeMax = 5;
 
     void Start()
     {
-        GenerateParticles();
-        m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
-        List<Particle>[] neighbours = ProcessNeighbour();
+        StartCoroutine(GenerateParticles());
+        m_particuleRenderer.setup(m_currentParticulesCounts, m_currentParticle);
+        /*List<Particle>[] neighbours = ProcessNeighbour();
 
-        for (int i = 0; i < m_particlesCounts; i++)
+        for (int i = 0; i < m_currentParticulesCounts; i++)
         {
             SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_prevParticle[i], neighbours[i].ToArray(),
                 m_groupRadius, m_minDensity, m_maxPressure);
-        }
+        }*/
 
         m_maxPressure /= m_subDivision;
         m_maxPressureForce /= m_subDivision;
@@ -49,13 +54,13 @@ public class FluidManager : MonoBehaviour
         {
             List<Particle>[] neighbours = ProcessNeighbour();
 
-            for (int i = 0; i < m_particlesCounts; i++)
+            for (int i = 0; i < m_currentParticulesCounts; i++)
             {
                 SmoothedParticleHydrodynamics.UpdateParticleDensity(ref m_currentParticle[i], neighbours[i].ToArray(),
                     m_groupRadius, m_minDensity, m_maxPressure);
             }
 
-            for (int i = 0; i < m_particlesCounts; i++)
+            for (int i = 0; i < m_currentParticulesCounts; i++)
             {
                 SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], neighbours[i].ToArray(),
                     m_groupRadius);
@@ -78,21 +83,21 @@ public class FluidManager : MonoBehaviour
 
     private void Update()
     {
-        m_particuleRenderer.setup(m_particlesCounts, m_currentParticle);
-        m_particuleRenderer.Update(m_particlesCounts);
+        m_particuleRenderer.setup(m_currentParticulesCounts, m_currentParticle);
+            m_particuleRenderer.Update(m_currentParticulesCounts);
     }
 
     List<Particle>[] ProcessNeighbour()
     {
-        List<Particle>[] particleNeighbour = new List<Particle>[m_particlesCounts];
+        List<Particle>[] particleNeighbour = new List<Particle>[m_currentParticulesCounts];
         float sqGroupRadius = m_groupRadius * m_groupRadius;
 
-        for (int i = 0; i < m_particlesCounts; i++)
+        for (int i = 0; i < m_currentParticulesCounts; i++)
         {
             particleNeighbour[i] = new List<Particle>();
             Vector2 currentParticlePos = m_prevParticle[i].pos;
 
-            for (int j = 0; j < m_particlesCounts; j++)
+            for (int j = 0; j < m_currentParticulesCounts; j++)
             {
                 // Don't include self
                 if (i == j)
@@ -108,22 +113,64 @@ public class FluidManager : MonoBehaviour
         return particleNeighbour;
     }
 
-    void GenerateParticles()
+    IEnumerator GenerateParticles()
     {
+        
         m_prevParticle = new Particle[m_particlesCounts];
         m_currentParticle = new Particle[m_particlesCounts];
 
-        for (int i = 0; i < m_particlesCounts; i++)
+        float currentTime = 0;
+        float currentTimeSpawn = 0;
+        bool firstLoop = true;
+        while (currentTime < m_timeMax)
         {
-            Particle newParticle = new Particle();
-            newParticle.pos =
+            currentTime += Time.deltaTime;
+            currentTimeSpawn += Time.deltaTime;
+            
+            if( !firstLoop && currentTimeSpawn < m_timeMax/m_particlesCounts)
+                continue;
+            
+            Particle newParticle = new Particle(); 
+            newParticle.pos = 
                 GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius);
-            newParticle.data = m_particuleDescriptor;
-            m_prevParticle[i] = newParticle;
-        }
+                newParticle.data = m_particuleDescriptor;
+                m_prevParticle[m_currentParticulesCounts] = newParticle;
+                m_currentParticulesCounts+= 1;
+            
 
-        m_currentParticle = m_prevParticle;
+            currentTimeSpawn = 0;
+            
+            if (firstLoop)
+                firstLoop = false;
+
+            if (m_currentParticulesCounts == m_particlesCounts)
+                break;
+            
+            m_currentParticle = m_prevParticle;
+
+            List<Particle> particleNeighbour = new List<Particle>();
+            float sqGroupRadius = m_groupRadius * m_groupRadius;
+
+        
+            for (int j = 0; j < m_currentParticulesCounts-1; j++)
+            {
+                Vector2 currentParticlePos = m_prevParticle.Last().pos;
+            
+                if ((currentParticlePos - m_prevParticle[j].pos).sqrMagnitude < sqGroupRadius)
+                {
+                    particleNeighbour.Add(m_prevParticle[j]);
+                }
+            }
+
+            //Update value particule
+            Particle temp = m_prevParticle.Last();
+            SmoothedParticleHydrodynamics.UpdateParticleDensity(ref temp, particleNeighbour.ToArray(),
+                m_groupRadius, m_minDensity, m_maxPressure);
+            
+            yield return null;
+        }
     }
+    
 
     static Vector2 GetRandomPointInCircleUniform(Vector2 center, float radius)
     {
