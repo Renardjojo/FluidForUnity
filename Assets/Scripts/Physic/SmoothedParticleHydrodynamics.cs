@@ -108,7 +108,6 @@ public class SmoothedParticleHydrodynamics
 
     static float ProcessPressure(Particle baseParticle)
     {
-        Debug.Log($"{baseParticle.data.gazStiffness * (baseParticle.density - baseParticle.data.baseDensity)}");
         return baseParticle.data.gazStiffness * (baseParticle.density - baseParticle.data.baseDensity);
     }
 
@@ -136,6 +135,12 @@ public class SmoothedParticleHydrodynamics
                     neighbourParticles[i].density * ViscosityForceKernel(distance, radius);
             }
         }
+        
+        if (float.IsNaN(pressureForce.x) || float.IsNaN(pressureForce.y))
+            Debug.Log("ok");
+        
+        if (float.IsNaN(viscosityForce.x) || float.IsNaN(viscosityForce.y))
+            Debug.Log("ok");
 
         return Physics2D.gravity + Vector2.ClampMagnitude(pressureForce + viscosityForce, maxVelocity);
     }
