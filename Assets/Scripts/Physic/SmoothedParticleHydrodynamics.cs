@@ -8,15 +8,15 @@ public class SmoothedParticleHydrodynamics
     {
         baseParticle.density = ProcessDensity(baseParticle, neighbourParticles, radius, maxDensity);
         baseParticle.pression = ProcessPressure(baseParticle);
+        if (float.IsNaN(baseParticle.density) || float.IsNaN(baseParticle.pression))
+            Debug.Log("ok");
     }
 
-    public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius)
+    public static void UpdateParticleForces(ref Particle baseParticle, Particle[] neighbourParticles, float radius, float maxVelocity)
     {
-        baseParticle.force = ProcessForces(baseParticle, neighbourParticles, radius);
-         if (float.IsNaN(baseParticle.force.x) || float.IsNaN(baseParticle.force.y))
-        {
-            Debug.Log("ptn");    
-        }
+        baseParticle.force = ProcessForces(baseParticle, neighbourParticles, radius, maxVelocity);
+        if (float.IsNaN(baseParticle.force.x) || float.IsNaN(baseParticle.force.y))
+            Debug.Log("ok");
         //baseParticle.pressionForce = ProcessPressureForce(baseParticle, neighbourParticles, radius);
         //baseParticle.viscosityForce = ProcessViscosityForce(baseParticle, neighbourParticles, radius);
     }
@@ -24,7 +24,12 @@ public class SmoothedParticleHydrodynamics
     public static void UpdateParticleVelocity(ref Particle baseParticle, float detlaTime, float maxVelocity)
     {
         baseParticle.velocity = ProcessVelocity(baseParticle, detlaTime, maxVelocity);
+        
+        if (float.IsNaN(baseParticle.velocity.x) || float.IsNaN(baseParticle.velocity.y))
+            Debug.Log("ok");
         baseParticle.pos += baseParticle.velocity * detlaTime;
+        if (float.IsNaN(baseParticle.pos.x) || float.IsNaN(baseParticle.pos.y))
+            Debug.Log("ok");
     }
 
     // r = distance, h = radius
@@ -103,10 +108,11 @@ public class SmoothedParticleHydrodynamics
 
     static float ProcessPressure(Particle baseParticle)
     {
+        Debug.Log($"{baseParticle.data.gazStiffness * (baseParticle.density - baseParticle.data.baseDensity)}");
         return baseParticle.data.gazStiffness * (baseParticle.density - baseParticle.data.baseDensity);
     }
 
-    static Vector2 ProcessForces(Particle baseParticle, Particle[] neighbourParticles, float radius)
+    static Vector2 ProcessForces(Particle baseParticle, Particle[] neighbourParticles, float radius, float maxVelocity)
     {
         Vector2 pressureForce = Vector2.zero;
         Vector2 viscosityForce = Vector2.zero;
@@ -131,7 +137,7 @@ public class SmoothedParticleHydrodynamics
             }
         }
 
-        return Physics2D.gravity + pressureForce + viscosityForce;
+        return Physics2D.gravity + Vector2.ClampMagnitude(pressureForce + viscosityForce, maxVelocity);
     }
 
     //static Vector2 ProcessPressureForce(Particle baseParticle, Particle[] neighbourParticles, float radius)

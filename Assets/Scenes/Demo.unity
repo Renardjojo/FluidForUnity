@@ -445,21 +445,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bed74ffe2480a40af1ada5767a6dfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_particlesCounts: 20
-  m_groupRadius: 2
+  m_particlesCounts: 200
+  m_groupRadius: 0.0457
   m_particuleDescriptor:
-    mass: 1
-    viscosityCoef: 0.25
-    gazStiffness: 2000
-    baseDensity: 2
+    mass: 0.02
+    viscosityCoef: 3.5
+    gazStiffness: 3
+    baseDensity: 998.89
   m_subDivision: 1
   m_maxCollisionRecursion: 4
   m_collisionEpsilonOffset: 0.01
-  m_maxVelocity: 10000
+  m_maxVelocity: 100
   m_maxDensity: 10000
   m_spawnPosition: {x: 0, y: 3}
-  m_spawnRadius: 0.1
-  timeScale: 0.2
+  m_spawnRadius: 1
+  timeScale: 0.1
   m_particuleRenderer:
     material: {fileID: 2100000, guid: ee5fea81fe8e18144892ed0928517179, type: 2}
     mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}

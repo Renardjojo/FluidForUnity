@@ -64,7 +64,7 @@ public class FluidManager : MonoBehaviour
             for (int i = 0; i < m_particlesCounts; i++)
             {
                 SmoothedParticleHydrodynamics.UpdateParticleForces(ref m_currentParticle[i], neighbours[i].ToArray(),
-                    m_groupRadius);
+                    m_groupRadius, m_maxVelocity);
 
                 Vector2 prevPos = m_currentParticle[i].pos;
                 SmoothedParticleHydrodynamics.UpdateParticleVelocity(ref m_currentParticle[i],
@@ -115,6 +115,10 @@ public class FluidManager : MonoBehaviour
             Particle newParticle = new Particle();
             newParticle.pos =
                 GetRandomPointInCircleUniform(m_spawnPosition + transform.position.ToVector2(), m_spawnRadius);
+            
+            if (float.IsNaN(newParticle.velocity.x) || float.IsNaN(newParticle.velocity.y))
+                Debug.Log("ok");
+            
             newParticle.data = m_particuleDescriptor;
             m_prevParticle[i] = newParticle;
         }
@@ -143,12 +147,17 @@ public class FluidManager : MonoBehaviour
             float dist = (nextPos - hit.point).magnitude;
             float velocityMagnitude = currentVelocity.magnitude;
 
+            if (Mathf.Approximately(velocityMagnitude, 0))
+                return;
+            
             Vector2 newDir = Vector2.Reflect(currentVelocity / velocityMagnitude, hit.normal);
             currentVelocity = newDir * currentVelocity.magnitude * hit.collider.sharedMaterial.bounciness;
 
 
             prevPos = hit.point + hit.normal * m_collisionEpsilonOffset;
             nextPos = hit.point + newDir * dist;
+            if (float.IsNaN(nextPos.x) || float.IsNaN(nextPos.y))
+                Debug.Log("ok");
         }
     }
 }
